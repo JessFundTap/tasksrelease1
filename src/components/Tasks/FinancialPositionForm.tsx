@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Upload } from 'lucide-react';
 import PropertyOwners from './FinancialPosition/PropertyOwners';
 import { useTaskVisibility } from '../../contexts/TaskVisibilityContext';
+import MultiFileUploader, { ACCEPT_STATEMENTS, MIME_STATEMENTS, HINT_STATEMENTS } from '../FileUpload/MultiFileUploader';
 
 export interface PropertyOwner {
   id: string;
@@ -25,7 +25,7 @@ const FinancialPositionForm: React.FC<FinancialPositionFormProps> = ({ readOnly 
   const [propertyOwners, setPropertyOwners] = useState<PropertyOwner[]>([]);
   const [trustName, setTrustName] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('');
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [mortgageFiles, setMortgageFiles] = useState<File[]>([]);
 
   const showMortgageStatement = facilitySize === '100-250' || facilitySize === 'above-250';
 
@@ -62,12 +62,12 @@ const FinancialPositionForm: React.FC<FinancialPositionFormProps> = ({ readOnly 
       onValidationChange?.(false);
       return;
     }
-    if (showMortgageStatement && !uploadedFile) {
+    if (showMortgageStatement && mortgageFiles.length === 0) {
       onValidationChange?.(false);
       return;
     }
     onValidationChange?.(true);
-  }, [propertyAddress, propertyOwnership, propertyOwners, trustName, companyName, showMortgageStatement, uploadedFile, onValidationChange]);
+  }, [propertyAddress, propertyOwnership, propertyOwners, trustName, companyName, showMortgageStatement, mortgageFiles, onValidationChange]);
 
   const addPropertyOwner = () => {
     if (readOnly) return;
@@ -95,39 +95,6 @@ const FinancialPositionForm: React.FC<FinancialPositionFormProps> = ({ readOnly 
     if (readOnly) return;
     const updated = propertyOwners.filter(owner => owner.id !== id);
     setPropertyOwners(updated);
-  };
-
-  const isValidFileType = (file: File): boolean => {
-    const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-    return validTypes.includes(file.type);
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (readOnly) return;
-    const file = event.target.files?.[0];
-    if (file && isValidFileType(file)) {
-      setUploadedFile(file);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (readOnly) return;
-    const file = event.dataTransfer.files?.[0];
-    if (file && isValidFileType(file)) {
-      setUploadedFile(file);
-    }
-  };
-
-  const removeUploadedFile = () => {
-    if (readOnly) return;
-    setUploadedFile(null);
   };
 
   return (
@@ -240,46 +207,17 @@ const FinancialPositionForm: React.FC<FinancialPositionFormProps> = ({ readOnly 
                 </div>
               </div>
 
-              {!uploadedFile ? (
-                <div
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-fundtap-primary hover:bg-fundtap-light/20 transition-colors duration-200"
-                >
-                  <input
-                    type="file"
-                    id="mortgage-statement"
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={handleFileUpload}
-                    disabled={readOnly}
-                    className="hidden"
-                  />
-                  <label htmlFor="mortgage-statement" className="cursor-pointer block">
-                    <Upload className="w-5 h-5 text-fundtap-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-gray-900 mb-1">Upload statement</p>
-                    <p className="text-xs text-gray-600">Drag and drop or click to upload</p>
-                    <p className="text-xs text-gray-500 mt-1">Accepted file types: JPG, JPEG, PDF, PNG</p>
-                  </label>
-                </div>
-              ) : (
-                <div className="border border-gray-200 rounded-lg p-4 flex items-center justify-between bg-gray-50">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Upload className="w-4 h-4 text-fundtap-primary flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{uploadedFile.name}</p>
-                      <p className="text-xs text-gray-500">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removeUploadedFile}
-                    disabled={readOnly}
-                    className="text-sm text-red-600 hover:text-red-700 font-medium flex-shrink-0 ml-4"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
+              <MultiFileUploader
+                id="mortgage-statement"
+                files={mortgageFiles}
+                onChange={setMortgageFiles}
+                accept={ACCEPT_STATEMENTS}
+                mimeTypes={MIME_STATEMENTS}
+                label="Upload mortgage statement"
+                hint={HINT_STATEMENTS}
+                maxFiles={5}
+                disabled={readOnly}
+              />
             </div>
           </>
         )}

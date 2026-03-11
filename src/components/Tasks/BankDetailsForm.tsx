@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Ban as BankIcon, Shield, ChevronRight, ChevronLeft, CheckCircle2, FileSignature } from 'lucide-react';
+import { Ban as BankIcon, Shield, ChevronRight, ChevronLeft, CheckCircle2 } from 'lucide-react';
+import MultiFileUploader, { ACCEPT_STATEMENTS, MIME_STATEMENTS, HINT_STATEMENTS } from '../FileUpload/MultiFileUploader';
 
 interface BankAccount {
   id: string;
@@ -22,7 +23,7 @@ const BankDetailsForm: React.FC<BankDetailsFormProps> = ({ onValidationChange })
   const [branchCode, setBranchCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [suffix, setSuffix] = useState('');
-  const [bankStatement, setBankStatement] = useState<File | null>(null);
+  const [bankStatementFiles, setBankStatementFiles] = useState<File[]>([]);
 
   const prefilledAccounts: BankAccount[] = [
     {
@@ -82,37 +83,7 @@ const BankDetailsForm: React.FC<BankDetailsFormProps> = ({ onValidationChange })
     setBranchCode('');
     setAccountNumber('');
     setSuffix('');
-    setBankStatement(null);
-  };
-
-  const isValidBankStatementType = (file: File): boolean => {
-    const validTypes = ['image/jpeg', 'image/png', 'application/pdf', 'image/heic'];
-    return validTypes.includes(file.type);
-  };
-
-  const handleBankStatementUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && isValidBankStatementType(file)) {
-      setBankStatement(file);
-    }
-  };
-
-  const handleBankStatementDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleBankStatementDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const file = event.dataTransfer.files?.[0];
-    if (file && isValidBankStatementType(file)) {
-      setBankStatement(file);
-    }
-  };
-
-  const removeBankStatement = () => {
-    setBankStatement(null);
+    setBankStatementFiles([]);
   };
 
   return (
@@ -279,46 +250,18 @@ const BankDetailsForm: React.FC<BankDetailsFormProps> = ({ onValidationChange })
             </form>
 
             <div className="border-t border-gray-200 pt-6 mt-6">
-              <label className="block text-sm font-medium text-gray-900 mb-3">Upload Bank Statement</label>
+              <label className="block text-sm font-medium text-gray-900 mb-3">Bank Statement</label>
               <p className="text-sm text-gray-600 mb-4">To verify the bank account</p>
-              {!bankStatement ? (
-                <div
-                  onDragOver={handleBankStatementDragOver}
-                  onDrop={handleBankStatementDrop}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-fundtap-primary hover:bg-fundtap-light/20 transition-colors duration-200"
-                >
-                  <input
-                    type="file"
-                    id="bank-statement"
-                    accept=".jpg,.jpeg,.png,.pdf,.heic"
-                    onChange={handleBankStatementUpload}
-                    className="hidden"
-                  />
-                  <label htmlFor="bank-statement" className="cursor-pointer block">
-                    <FileSignature className="w-5 h-5 text-fundtap-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-gray-900 mb-1">Upload bank statement</p>
-                    <p className="text-xs text-gray-600">Drag and drop or click to upload</p>
-                    <p className="text-xs text-gray-500 mt-1">JPG, JPEG, PNG, PDF or HEIC</p>
-                  </label>
-                </div>
-              ) : (
-                <div className="border border-gray-200 rounded-lg p-4 flex items-center justify-between bg-gray-50">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <FileSignature className="w-4 h-4 text-fundtap-primary flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{bankStatement.name}</p>
-                      <p className="text-xs text-gray-500">{(bankStatement.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removeBankStatement}
-                    className="text-sm text-red-600 hover:text-red-700 font-medium flex-shrink-0 ml-4"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
+              <MultiFileUploader
+                id="bank-statement"
+                files={bankStatementFiles}
+                onChange={setBankStatementFiles}
+                accept={ACCEPT_STATEMENTS}
+                mimeTypes={MIME_STATEMENTS}
+                label="Upload bank statement"
+                hint={HINT_STATEMENTS}
+                maxFiles={5}
+              />
             </div>
           </div>
         )}
