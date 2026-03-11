@@ -260,7 +260,7 @@ const BankDetailsForm: React.FC<BankDetailsFormProps> = ({ onValidationChange })
                 mimeTypes={MIME_STATEMENTS}
                 label="Upload bank statement"
                 hint={HINT_STATEMENTS}
-                maxFiles={5}
+                maxFiles={1}
               />
             </div>
           </div>
