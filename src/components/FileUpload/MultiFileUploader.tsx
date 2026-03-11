@@ -1,15 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { Upload, FileText, Plus, X } from 'lucide-react';
 
-export const ACCEPT_STATEMENTS = '.pdf,.jpg,.jpeg,.png,.heic,.webp';
+export const ACCEPT_STATEMENTS = '.pdf,.jpg,.jpeg,.png,.heic';
 export const MIME_STATEMENTS = [
   'application/pdf',
   'image/jpeg',
   'image/png',
   'image/heic',
-  'image/webp',
 ];
-export const HINT_STATEMENTS = 'PDF, JPG, PNG, HEIC or WEBP';
+export const HINT_STATEMENTS = 'PDF, JPG, PNG or HEIC';
 
 export const ACCEPT_DOCUMENTS = '.pdf';
 export const MIME_DOCUMENTS = ['application/pdf'];
